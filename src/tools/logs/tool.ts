@@ -29,12 +29,27 @@ export const createLogsToolHandlers = (
       request.params.arguments,
     )
 
+    // update from to be the max of from and 30 minutes ago
+    const thirtyMinutesAgo = Math.floor(Date.now() / 1000) - 30 * 60
+    const adjustedFrom = Math.max(from, thirtyMinutesAgo)
+
+    if (adjustedFrom > to) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Logs data: ${[]}`,
+          },
+        ],
+      }
+    }
+
     const response = await apiInstance.listLogs({
       body: {
         filter: {
           query,
           // `from` and `to` are in epoch seconds, but the Datadog API expects milliseconds
-          from: `${from * 1000}`,
+          from: `${adjustedFrom * 1000}`,
           to: `${to * 1000}`,
         },
         page: {
@@ -43,9 +58,6 @@ export const createLogsToolHandlers = (
         sort: '-timestamp',
       },
     })
-
-    // only keep logs that are less than 30 minutes old
-    const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000
 
     const filteredData = response.data?.filter(
       (log) =>
