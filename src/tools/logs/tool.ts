@@ -44,6 +44,15 @@ export const createLogsToolHandlers = (
       },
     })
 
+    // only keep logs that are less than 30 minutes old
+    const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000
+
+    const filteredData = response.data?.filter(
+      (log) =>
+        log.attributes?.timestamp !== undefined &&
+        log.attributes.timestamp.getTime() > thirtyMinutesAgo,
+    )
+
     if (response.data == null) {
       throw new Error('No logs data returned')
     }
@@ -52,7 +61,7 @@ export const createLogsToolHandlers = (
       content: [
         {
           type: 'text',
-          text: `Logs data: ${JSON.stringify(response.data)}`,
+          text: `Logs data: ${JSON.stringify(filteredData)}`,
         },
       ],
     }
