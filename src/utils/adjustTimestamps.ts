@@ -13,13 +13,30 @@ export const adjustTimestamps = (
 
   const adjustedTo = Math.min(to, evalSecs)
 
-  if (adjustedTo < from) {
+  // Calculate the original interval
+  const interval = to - from
+
+  // Adjust 'from' to maintain the same interval, but ensure it's not negative
+  const adjustedFrom = Math.max(0, adjustedTo - interval)
+
+  // If the requested timeframe is entirely after the eval timestamp,
+  // adjust to show the last 'interval' seconds before eval timestamp
+  if (from > evalSecs) {
+    const cappedInterval = Math.min(interval, evalSecs)
+    return {
+      ok: true,
+      from: evalSecs - cappedInterval,
+      to: evalSecs,
+    }
+  }
+
+  if (adjustedTo <= adjustedFrom) {
     return { ok: false }
   }
 
   return {
     ok: true,
-    from,
+    from: adjustedFrom,
     to: adjustedTo,
   }
 }
