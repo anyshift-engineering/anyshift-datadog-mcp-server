@@ -6,7 +6,11 @@ export const adjustTimestamps = (
   const evalTimestamp = process.env.DATADOG_EVAL_TIMESTAMP
 
   if (evalTimestamp === undefined) {
-    throw new Error('[MCP Eval Version] DATADOG_EVAL_TIMESTAMP must be set')
+    return {
+      ok: true,
+      from,
+      to,
+    }
   }
 
   const evalSecs = Math.floor(new Date(evalTimestamp).getTime() / 1000)
