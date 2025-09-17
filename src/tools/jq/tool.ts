@@ -91,7 +91,7 @@ export const createJqToolHandlers = (): JqToolHandlers => {
 
         jqProcess.on('close', (code) => {
           if (code === 0) {
-            // Success - return clean response directly to AI
+            // Success - return clean response directly to AI with automatic truncation
             const responseText = stdout.trim()
 
             resolve({

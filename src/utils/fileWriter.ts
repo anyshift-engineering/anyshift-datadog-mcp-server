@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import path from 'path'
 import crypto from 'crypto'
+import { McpResponse } from './responses/McpResponse'
 
 // File output configuration
 export const WRITE_TO_FILE = process.env.WRITE_TO_FILE === 'true'
@@ -165,23 +166,25 @@ export async function handleToolResponse(
     await fs.mkdir(OUTPUT_DIR, { recursive: true })
 
     // Extract the actual data from MCP response format
+    // Use raw text from McpResponse if available, otherwise fall back to display text
     let contentToWrite: string
     let parsedForSchema: unknown
 
-    if (responseData.content && Array.isArray(responseData.content)) {
-      // Extract text from MCP response content
-      const textContent = responseData.content
-        .filter((item: unknown) => (item as { type?: string }).type === 'text')
-        .map((item: unknown) => (item as { text: string }).text)
-        .join('\n')
+    // Check if response has raw text from McpResponse (untruncated content)
+    const rawText = McpResponse.extractRawText(
+      responseData as unknown as Parameters<
+        typeof McpResponse.extractRawText
+      >[0],
+    )
 
+    if (rawText) {
       try {
-        // Try to parse the text as JSON for prettier formatting
+        // Try to parse the raw text as JSON for prettier formatting
         // Handle cases where text might contain "Listed incidents: {...}" or "Queried metrics data: {...}"
-        let jsonText = textContent
+        let jsonText = rawText
 
         // Extract JSON from common response patterns
-        const jsonMatch = textContent.match(/:\s*(\{.*\}|\[.*\])$/s)
+        const jsonMatch = rawText.match(/:\s*(\{.*\}|\[.*\])$/s)
         if (jsonMatch) {
           jsonText = jsonMatch[1]
         }
@@ -190,12 +193,22 @@ export async function handleToolResponse(
         parsedForSchema = parsed
         contentToWrite = JSON.stringify(parsed, null, 2)
       } catch {
-        // If parsing fails, write the raw text
-        contentToWrite = textContent
+        // If parsing fails, write the raw text directly
+        contentToWrite = rawText
       }
     } else {
-      // Fallback: stringify the entire response
-      contentToWrite = JSON.stringify(responseData, null, 2)
+      // Fallback: extract from display content or stringify the entire response
+      if (responseData.content && Array.isArray(responseData.content)) {
+        const textContent = responseData.content
+          .filter(
+            (item: unknown) => (item as { type?: string }).type === 'text',
+          )
+          .map((item: unknown) => (item as { text: string }).text)
+          .join('\n')
+        contentToWrite = textContent
+      } else {
+        contentToWrite = JSON.stringify(responseData, null, 2)
+      }
     }
 
     // TODO: Add file size limits for disk space management

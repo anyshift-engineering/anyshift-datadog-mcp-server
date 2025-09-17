@@ -2,6 +2,7 @@ import { ExtendedTool, ToolHandlers } from '../../utils/types'
 import { v2 } from '@datadog/datadog-api-client'
 import { createToolSchema } from '../../utils/tool'
 import { ListTracesZodSchema } from './schema'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 type TracesToolName = 'list_traces'
 type TracesTool = ExtendedTool<TracesToolName>
@@ -56,17 +57,13 @@ export const createTracesToolHandlers = (
         throw new Error('No traces data returned')
       }
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Traces: ${JSON.stringify({
-              traces: response.data,
-              count: response.data.length,
-            })}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData(
+        {
+          traces: response.data,
+          count: response.data.length,
+        },
+        'Traces:',
+      )
     },
   }
 }

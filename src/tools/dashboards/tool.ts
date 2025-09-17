@@ -2,6 +2,7 @@ import { ExtendedTool, ToolHandlers } from '../../utils/types'
 import { v1 } from '@datadog/datadog-api-client'
 import { createToolSchema } from '../../utils/tool'
 import { GetDashboardZodSchema, ListDashboardsZodSchema } from './schema'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 type DashboardsToolName = 'list_dashboards' | 'get_dashboard'
 type DashboardsTool = ExtendedTool<DashboardsToolName>
@@ -58,14 +59,7 @@ export const createDashboardsToolHandlers = (
         url: `https://app.datadoghq.com/dashboard/${dashboard.id}`,
       }))
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Dashboards: ${JSON.stringify(dashboards)}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData(dashboards, 'Dashboards:')
     },
     get_dashboard: async (request) => {
       const { dashboardId } = GetDashboardZodSchema.parse(
@@ -76,14 +70,7 @@ export const createDashboardsToolHandlers = (
         dashboardId,
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Dashboard: ${JSON.stringify(response)}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData(response, 'Dashboard:')
     },
   }
 }

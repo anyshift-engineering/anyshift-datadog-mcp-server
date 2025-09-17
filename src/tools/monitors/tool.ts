@@ -4,6 +4,7 @@ import { createToolSchema } from '../../utils/tool'
 import { GetMonitorsZodSchema } from './schema'
 import { unreachable } from '../../utils/helper'
 import { UnparsedObject } from '@datadog/datadog-api-client/dist/packages/datadog-api-client-common/util.js'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 type MonitorsToolName = 'get_monitors'
 type MonitorsTool = ExtendedTool<MonitorsToolName>
@@ -95,18 +96,10 @@ export const createMonitorsToolHandlers = (
         },
       )
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Monitors: ${JSON.stringify(monitors)}`,
-          },
-          {
-            type: 'text',
-            text: `Summary of monitors: ${JSON.stringify(summary)}`,
-          },
-        ],
-      }
+      return McpResponse.successWithRaw(
+        `Monitors summary: ${JSON.stringify(summary, null, 2)}`,
+        `Monitors: ${JSON.stringify(monitors)}\n\nSummary of monitors: ${JSON.stringify(summary)}`,
+      )
     },
   }
 }

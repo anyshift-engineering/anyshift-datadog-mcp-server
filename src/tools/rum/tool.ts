@@ -9,6 +9,7 @@ import {
   GetRumPageWaterfallZodSchema,
 } from './schema'
 import { adjustTimestamps } from '../../utils/adjustTimestamps'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 type RumToolName =
   | 'get_rum_events'
@@ -60,14 +61,7 @@ export const createRumToolHandlers = (
       throw new Error('No RUM applications data returned')
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `RUM applications: ${JSON.stringify(response.data)}`,
-        },
-      ],
-    }
+    return McpResponse.fromApiData(response.data, 'RUM applications:')
   },
 
   get_rum_events: async (request) => {
@@ -77,14 +71,7 @@ export const createRumToolHandlers = (
 
     const adjusted = adjustTimestamps(from, to)
     if (!adjusted.ok) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `RUM events data: ${[]}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData([], 'RUM events data:')
     }
 
     const response = await apiInstance.listRUMEvents({
@@ -99,14 +86,7 @@ export const createRumToolHandlers = (
       throw new Error('No RUM events data returned')
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `RUM events data: ${JSON.stringify(response.data)}`,
-        },
-      ],
-    }
+    return McpResponse.fromApiData(response.data, 'RUM events data:')
   },
 
   get_rum_grouped_event_count: async (request) => {
@@ -116,14 +96,7 @@ export const createRumToolHandlers = (
 
     const adjusted = adjustTimestamps(from, to)
     if (!adjusted.ok) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `RUM grouped event count: ${[]}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData([], 'RUM grouped event count:')
     }
 
     // For session counts, we need to use a query to count unique sessions
@@ -174,14 +147,10 @@ export const createRumToolHandlers = (
       Array.from(sessions.entries()).map(([key, set]) => [key, set.size]),
     )
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Session counts (grouped by ${groupBy}): ${JSON.stringify(sessionCounts)}`,
-        },
-      ],
-    }
+    return McpResponse.fromApiData(
+      sessionCounts,
+      `Session counts (grouped by ${groupBy}):`,
+    )
   },
 
   get_rum_page_performance: async (request) => {
@@ -190,14 +159,7 @@ export const createRumToolHandlers = (
 
     const adjusted = adjustTimestamps(from, to)
     if (!adjusted.ok) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Page performance metrics: ${[]}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData([], 'Page performance metrics:')
     }
 
     // Build a query that focuses on view events with performance metrics
@@ -277,14 +239,7 @@ export const createRumToolHandlers = (
       >,
     )
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Page performance metrics: ${JSON.stringify(results)}`,
-        },
-      ],
-    }
+    return McpResponse.fromApiData(results, 'Page performance metrics:')
   },
 
   get_rum_page_waterfall: async (request) => {
@@ -302,14 +257,7 @@ export const createRumToolHandlers = (
       throw new Error('No RUM events data returned')
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Waterfall data: ${JSON.stringify(response.data)}`,
-        },
-      ],
-    }
+    return McpResponse.fromApiData(response.data, 'Waterfall data:')
   },
 })
 
