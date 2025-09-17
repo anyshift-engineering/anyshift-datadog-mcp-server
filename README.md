@@ -1,239 +1,319 @@
-# Datadog MCP Server
+# Anyshift Datadog MCP Server
 
-> **DISCLAIMER**: This is a community-maintained project and is not officially affiliated with, endorsed by, or supported by Datadog, Inc. This MCP server utilizes the Datadog API but is developed independently as part of the [Model Context Protocol](https://github.com/modelcontextprotocol/servers) ecosystem.
+> **Enhanced fork** of the original [mcp-server-datadog](https://github.com/winor30/mcp-server-datadog) by [@winor30](https://github.com/winor30), developed and maintained by [Anyshift](https://github.com/anyshift-engineering). This version includes additional features for JSON processing, file writing capabilities, and enhanced observability tools.
 
-![NPM Version](https://img.shields.io/npm/v/%40winor30%2Fmcp-server-datadog)![Build and Test](https://github.com/winor30/mcp-server-datadog/actions/workflows/ci.yml/badge.svg)[![codecov](https://codecov.io/gh/winor30/mcp-server-datadog/graph/badge.svg?token=BG4ZB74X92)](https://codecov.io/gh/winor30/mcp-server-datadog)[![smithery badge](https://smithery.ai/badge/@winor30/mcp-server-datadog)](https://smithery.ai/server/@winor30/mcp-server-datadog)
+[![Build Status](https://github.com/anyshift-engineering/mcp-server-datadog/workflows/CI/badge.svg)](https://github.com/anyshift-engineering/mcp-server-datadog/actions)
 
-MCP server for the Datadog API, enabling incident management and more.
+A comprehensive MCP server for the Datadog API, enabling advanced incident management, observability, and data analysis workflows.
 
-<a href="https://glama.ai/mcp/servers/bu8gtzkwfr">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/bu8gtzkwfr/badge" alt="mcp-server-datadog MCP server" />
-</a>
+## ✨ Anyshift Enhancements
+
+This fork includes several powerful enhancements beyond the original implementation:
+
+- **🔍 JQ Query Tool** - Advanced JSON processing and analysis capabilities with security controls
+- **💾 File Writing System** - Configurable response persistence with structured output and schema analysis
+- **⏰ Timestamp Adjustment** - Evaluation timestamp support for controlled data timeframes
+- **🛠️ Enhanced Tooling** - Comprehensive coverage of Datadog APIs with improved error handling
+- **🏗️ Modular Architecture** - Clean, extensible design for easy feature additions
 
 ## Features
 
-- **Observability Tools**: Provides a mechanism to leverage key Datadog monitoring features, such as incidents, monitors, logs, dashboards, and metrics, through the MCP server.
-- **Extensible Design**: Designed to easily integrate with additional Datadog APIs, allowing for seamless future feature expansion.
+- **Complete Datadog Integration**: Full access to incidents, monitors, logs, dashboards, metrics, traces, hosts, downtimes, and RUM data
+- **Advanced Data Processing**: Built-in JSON querying and transformation capabilities
+- **Flexible Output Options**: Direct responses or structured file output with automatic schema generation
+- **Security-First Design**: Input validation and sanitization throughout
+- **Developer-Friendly**: Comprehensive debugging tools and clear documentation
 
-## Tools
+## Tools Overview
 
-1. `list_incidents`
+### 📊 **Observability & Monitoring**
 
-   - Retrieve a list of incidents from Datadog.
-   - **Inputs**:
-     - `filter` (optional string): Filter parameters for incidents (e.g., status, priority).
-     - `pagination` (optional object): Pagination details like page size/offset.
-   - **Returns**: Array of Datadog incidents and associated metadata.
+- `list_incidents` / `get_incident` - Incident management
+- `get_monitors` - Monitor status and configuration
+- `query_metrics` - Metrics data retrieval
+- `search_logs` / `get_logs` / `list_logs` - Log analysis
+- `list_traces` - APM trace investigation
 
-2. `get_incident`
+### 📈 **Dashboards & Visualization**
 
-   - Retrieve detailed information about a specific Datadog incident.
-   - **Inputs**:
-     - `incident_id` (string): Incident ID to fetch details for.
-   - **Returns**: Detailed incident information (title, status, timestamps, etc.).
+- `list_dashboards` / `get_dashboard` - Dashboard management
+- `create_dashboard` / `update_dashboard` - Dashboard creation and updates
 
-3. `get_monitors`
+### 🖥️ **Infrastructure Management**
 
-   - Fetch the status of Datadog monitors.
-   - **Inputs**:
-     - `groupStates` (optional array): States to filter (e.g., alert, warn, no data, ok).
-     - `name` (optional string): Filter by name.
-     - `tags` (optional array): Filter by tags.
-   - **Returns**: Monitors data and a summary of their statuses.
+- `list_hosts` / `get_host` - Host inventory and details
+- `mute_host` / `unmute_host` - Host muting controls
+- `get_active_hosts_count` - Active host metrics
 
-4. `get_logs`
+### ⏰ **Downtime Management**
 
-   - Search and retrieve logs from Datadog.
-   - **Inputs**:
-     - `query` (string): Datadog logs query string.
-     - `from` (number): Start time in epoch seconds.
-     - `to` (number): End time in epoch seconds.
-     - `limit` (optional number): Maximum number of logs to return (defaults to 100).
-   - **Returns**: Array of matching logs.
+- `list_downtimes` - Scheduled downtime overview
+- `schedule_downtime` - Create maintenance windows
+- `cancel_downtime` - Cancel scheduled downtimes
 
-5. `list_dashboards`
+### 📱 **Real User Monitoring (RUM)**
 
-   - Get a list of dashboards from Datadog.
-   - **Inputs**:
-     - `name` (optional string): Filter dashboards by name.
-     - `tags` (optional array): Filter dashboards by tags.
-   - **Returns**: Array of dashboards with URL references.
+- `get_rum_applications` - RUM application inventory
+- `get_rum_events` - RUM event analysis
+- `get_rum_grouped_event_count` - Aggregated RUM metrics
+- `get_rum_page_performance` - Page performance analytics
+- `get_rum_page_waterfall` - Detailed page load analysis
 
-6. `get_dashboard`
+### 🔧 **Data Processing (Anyshift Enhancement)**
 
-   - Retrieve a specific dashboard from Datadog.
-   - **Inputs**:
-     - `dashboard_id` (string): ID of the dashboard to fetch.
-   - **Returns**: Dashboard details including title, widgets, etc.
+- `execute_jq_query` - Advanced JSON processing with security controls
 
-7. `query_metrics`
+## Detailed Tool Documentation
 
-   - Retrieve metrics data from Datadog.
-   - **Inputs**:
-     - `query` (string): Metrics query string.
-     - `from` (number): Start time in epoch seconds.
-     - `to` (number): End time in epoch seconds.
-   - **Returns**: Metrics data for the queried timeframe.
+<details>
+<summary><strong>Incident Management</strong></summary>
 
-8. `list_traces`
+### `list_incidents`
 
-   - Retrieve a list of APM traces from Datadog.
-   - **Inputs**:
-     - `query` (string): Datadog APM trace query string.
-     - `from` (number): Start time in epoch seconds.
-     - `to` (number): End time in epoch seconds.
-     - `limit` (optional number): Maximum number of traces to return (defaults to 100).
-     - `sort` (optional string): Sort order for traces (defaults to '-timestamp').
-     - `service` (optional string): Filter by service name.
-     - `operation` (optional string): Filter by operation name.
-   - **Returns**: Array of matching traces from Datadog APM.
+Retrieve a list of incidents from Datadog.
 
-9. `list_hosts`
+- **Inputs**:
+  - `filter` (optional string): Filter parameters for incidents (e.g., status, priority)
+  - `pagination` (optional object): Pagination details like page size/offset
+- **Returns**: Array of Datadog incidents and associated metadata
 
-   - Get list of hosts from Datadog.
-   - **Inputs**:
-     - `filter` (optional string): Filter string for search results.
-     - `sort_field` (optional string): Field to sort hosts by.
-     - `sort_dir` (optional string): Sort direction (asc/desc).
-     - `start` (optional number): Starting offset for pagination.
-     - `count` (optional number): Max number of hosts to return (max: 1000).
-     - `from` (optional number): Search hosts from this UNIX timestamp.
-     - `include_muted_hosts_data` (optional boolean): Include muted hosts status and expiry.
-     - `include_hosts_metadata` (optional boolean): Include host metadata (version, platform, etc).
-   - **Returns**: Array of hosts with details including name, ID, aliases, apps, mute status, and more.
+### `get_incident`
 
-10. `get_active_hosts_count`
+Retrieve detailed information about a specific Datadog incident.
 
-    - Get the total number of active hosts in Datadog.
-    - **Inputs**:
-      - `from` (optional number): Number of seconds from which you want to get total number of active hosts (defaults to 2h).
-    - **Returns**: Count of total active and up hosts.
+- **Inputs**:
+  - `incident_id` (string): Incident ID to fetch details for
+- **Returns**: Detailed incident information (title, status, timestamps, etc.)
 
-11. `mute_host`
+</details>
 
-    - Mute a host in Datadog.
-    - **Inputs**:
-      - `hostname` (string): The name of the host to mute.
-      - `message` (optional string): Message to associate with the muting of this host.
-      - `end` (optional number): POSIX timestamp for when the mute should end.
-      - `override` (optional boolean): If true and the host is already muted, replaces existing end time.
-    - **Returns**: Success status and confirmation message.
+<details>
+<summary><strong>Monitoring & Metrics</strong></summary>
 
-12. `unmute_host`
+### `get_monitors`
 
-    - Unmute a host in Datadog.
-    - **Inputs**:
-      - `hostname` (string): The name of the host to unmute.
-    - **Returns**: Success status and confirmation message.
+Fetch the status of Datadog monitors.
 
-13. `list_downtimes`
+- **Inputs**:
+  - `groupStates` (optional array): States to filter (e.g., alert, warn, no data, ok)
+  - `name` (optional string): Filter by name
+  - `tags` (optional array): Filter by tags
+- **Returns**: Monitors data and a summary of their statuses
 
-    - List scheduled downtimes from Datadog.
-    - **Inputs**:
-      - `currentOnly` (optional boolean): Return only currently active downtimes when true.
-      - `monitorId` (optional number): Filter by monitor ID.
-    - **Returns**: Array of scheduled downtimes with details including scope, monitor information, and schedule.
+### `query_metrics`
 
-14. `schedule_downtime`
+Retrieve metrics data from Datadog.
 
-    - Schedule a downtime in Datadog.
-    - **Inputs**:
-      - `scope` (string): Scope to apply downtime to (e.g. 'host:my-host').
-      - `start` (optional number): UNIX timestamp for the start of the downtime.
-      - `end` (optional number): UNIX timestamp for the end of the downtime.
-      - `message` (optional string): A message to include with the downtime.
-      - `timezone` (optional string): The timezone for the downtime (e.g. 'UTC', 'America/New_York').
-      - `monitorId` (optional number): The ID of the monitor to mute.
-      - `monitorTags` (optional array): A list of monitor tags for filtering.
-      - `recurrence` (optional object): Recurrence settings for the downtime.
-        - `type` (string): Recurrence type ('days', 'weeks', 'months', 'years').
-        - `period` (number): How often to repeat (must be >= 1).
-        - `weekDays` (optional array): Days of the week for weekly recurrence.
-        - `until` (optional number): UNIX timestamp for when the recurrence ends.
-    - **Returns**: Scheduled downtime details including ID and active status.
+- **Inputs**:
+  - `query` (string): Metrics query string
+  - `from` (number): Start time in epoch seconds
+  - `to` (number): End time in epoch seconds
+- **Returns**: Metrics data for the queried timeframe
 
-15. `cancel_downtime`
+</details>
 
-    - Cancel a scheduled downtime in Datadog.
-    - **Inputs**:
-      - `downtimeId` (number): The ID of the downtime to cancel.
-    - **Returns**: Confirmation of downtime cancellation.
+<details>
+<summary><strong>Logs & Traces</strong></summary>
 
-16. `get_rum_applications`
+### `get_logs`
 
-    - Get all RUM applications in the organization.
-    - **Inputs**: None.
-    - **Returns**: List of RUM applications.
+Search and retrieve logs from Datadog.
 
-17. `get_rum_events`
+- **Inputs**:
+  - `query` (string): Datadog logs query string
+  - `from` (number): Start time in epoch seconds
+  - `to` (number): End time in epoch seconds
+  - `limit` (optional number): Maximum number of logs to return (defaults to 100)
+- **Returns**: Array of matching logs
 
-    - Search and retrieve RUM events from Datadog.
-    - **Inputs**:
-      - `query` (string): Datadog RUM query string.
-      - `from` (number): Start time in epoch seconds.
-      - `to` (number): End time in epoch seconds.
-      - `limit` (optional number): Maximum number of events to return (default: 100).
-    - **Returns**: Array of RUM events.
+### `list_traces`
 
-18. `get_rum_grouped_event_count`
+Retrieve a list of APM traces from Datadog.
 
-    - Search, group and count RUM events by a specified dimension.
-    - **Inputs**:
-      - `query` (optional string): Additional query filter for RUM search (default: "\*").
-      - `from` (number): Start time in epoch seconds.
-      - `to` (number): End time in epoch seconds.
-      - `groupBy` (optional string): Dimension to group results by (default: "application.name").
-    - **Returns**: Grouped event counts.
+- **Inputs**:
+  - `query` (string): Datadog APM trace query string
+  - `from` (number): Start time in epoch seconds
+  - `to` (number): End time in epoch seconds
+  - `limit` (optional number): Maximum number of traces to return (defaults to 100)
+  - `sort` (optional string): Sort order for traces (defaults to '-timestamp')
+  - `service` (optional string): Filter by service name
+  - `operation` (optional string): Filter by operation name
+- **Returns**: Array of matching traces from Datadog APM
 
-19. `get_rum_page_performance`
+</details>
 
-    - Get page (view) performance metrics from RUM data.
-    - **Inputs**:
-      - `query` (optional string): Additional query filter for RUM search (default: "\*").
-      - `from` (number): Start time in epoch seconds.
-      - `to` (number): End time in epoch seconds.
-      - `metricNames` (array of strings): Array of metric names to retrieve (e.g., 'view.load_time', 'view.first_contentful_paint').
-    - **Returns**: Performance metrics including average, min, max, and count for each metric.
+<details>
+<summary><strong>Dashboards</strong></summary>
 
-20. `get_rum_page_waterfall`
+### `list_dashboards`
 
-    - Retrieve RUM page (view) waterfall data filtered by application name and session ID.
-    - **Inputs**:
-      - `applicationName` (string): Application name to filter events.
-      - `sessionId` (string): Session ID to filter events.
-    - **Returns**: Waterfall data for the specified application and session.
+Get a list of dashboards from Datadog.
+
+- **Inputs**:
+  - `name` (optional string): Filter dashboards by name
+  - `tags` (optional array): Filter dashboards by tags
+- **Returns**: Array of dashboards with URL references
+
+### `get_dashboard`
+
+Retrieve a specific dashboard from Datadog.
+
+- **Inputs**:
+  - `dashboard_id` (string): ID of the dashboard to fetch
+- **Returns**: Dashboard details including title, widgets, etc.
+
+</details>
+
+<details>
+<summary><strong>Host Management</strong></summary>
+
+### `list_hosts`
+
+Get list of hosts from Datadog.
+
+- **Inputs**:
+  - `filter` (optional string): Filter string for search results
+  - `sort_field` (optional string): Field to sort hosts by
+  - `sort_dir` (optional string): Sort direction (asc/desc)
+  - `start` (optional number): Starting offset for pagination
+  - `count` (optional number): Max number of hosts to return (max: 1000)
+  - `from` (optional number): Search hosts from this UNIX timestamp
+  - `include_muted_hosts_data` (optional boolean): Include muted hosts status and expiry
+  - `include_hosts_metadata` (optional boolean): Include host metadata (version, platform, etc)
+- **Returns**: Array of hosts with details including name, ID, aliases, apps, mute status, and more
+
+### `mute_host`
+
+Mute a host in Datadog.
+
+- **Inputs**:
+  - `hostname` (string): The name of the host to mute
+  - `message` (optional string): Message to associate with the muting of this host
+  - `end` (optional number): POSIX timestamp for when the mute should end
+  - `override` (optional boolean): If true and the host is already muted, replaces existing end time
+- **Returns**: Success status and confirmation message
+
+</details>
+
+<details>
+<summary><strong>Downtime Management</strong></summary>
+
+### `list_downtimes`
+
+List scheduled downtimes from Datadog.
+
+- **Inputs**:
+  - `currentOnly` (optional boolean): Return only currently active downtimes when true
+  - `monitorId` (optional number): Filter by monitor ID
+- **Returns**: Array of scheduled downtimes with details including scope, monitor information, and schedule
+
+### `schedule_downtime`
+
+Schedule a downtime in Datadog.
+
+- **Inputs**:
+  - `scope` (string): Scope to apply downtime to (e.g. 'host:my-host')
+  - `start` (optional number): UNIX timestamp for the start of the downtime
+  - `end` (optional number): UNIX timestamp for the end of the downtime
+  - `message` (optional string): A message to include with the downtime
+  - `timezone` (optional string): The timezone for the downtime (e.g. 'UTC', 'America/New_York')
+  - `monitorId` (optional number): The ID of the monitor to mute
+  - `monitorTags` (optional array): A list of monitor tags for filtering
+  - `recurrence` (optional object): Recurrence settings for the downtime
+- **Returns**: Scheduled downtime details including ID and active status
+
+</details>
+
+<details>
+<summary><strong>RUM Analytics</strong></summary>
+
+### `get_rum_applications`
+
+Get all RUM applications in the organization.
+
+- **Inputs**: None
+- **Returns**: List of RUM applications
+
+### `get_rum_events`
+
+Search and retrieve RUM events from Datadog.
+
+- **Inputs**:
+  - `query` (string): Datadog RUM query string
+  - `from` (number): Start time in epoch seconds
+  - `to` (number): End time in epoch seconds
+  - `limit` (optional number): Maximum number of events to return (default: 100)
+- **Returns**: Array of RUM events
+
+### `get_rum_page_performance`
+
+Get page (view) performance metrics from RUM data.
+
+- **Inputs**:
+  - `query` (optional string): Additional query filter for RUM search (default: "\*")
+  - `from` (number): Start time in epoch seconds
+  - `to` (number): End time in epoch seconds
+  - `metricNames` (array of strings): Array of metric names to retrieve
+- **Returns**: Performance metrics including average, min, max, and count for each metric
+
+</details>
+
+<details>
+<summary><strong>JSON Processing (Anyshift Enhancement)</strong></summary>
+
+### `execute_jq_query`
+
+Advanced JSON processing and analysis tool with security controls.
+
+- **Inputs**:
+  - `jq_query` (string): jq query string for JSON processing
+  - `file_path` (string): Absolute path to JSON file to process
+  - `description` (optional string): Description of the operation
+- **Returns**: Processed JSON data according to the query
+- **Security**: Blocks environment variable access and system information queries
+- **Examples**:
+  - `.users[].name` - Extract user names
+  - `.data | length` - Count items
+  - `.[].status | select(. == "active")` - Filter by status
+
+</details>
 
 ## Setup
 
-### Datadog Credentials
+### Environment Variables
 
-You need valid Datadog API credentials to use this MCP server:
-
-- `DATADOG_API_KEY`: Your Datadog API key
-- `DATADOG_APP_KEY`: Your Datadog Application key
-- `DATADOG_SITE` (optional): The Datadog site (e.g. `datadoghq.eu`)
-
-Export them in your environment before running the server:
+#### **Required Datadog Credentials**
 
 ```bash
 export DATADOG_API_KEY="your_api_key"
 export DATADOG_APP_KEY="your_app_key"
-export DATADOG_SITE="your_datadog_site"
+export DATADOG_SITE="your_datadog_site"  # Optional, defaults to datadoghq.com
+```
+
+#### **Anyshift Enhancements**
+
+```bash
+# File Writing System
+export WRITE_TO_FILE="true"              # Enable response file writing
+export OUTPUT_DIR="/path/to/output"      # Directory for output files
+
+# Timestamp Adjustment (for evaluation scenarios)
+export DATADOG_EVAL_TIMESTAMP="2024-01-15T10:30:00Z"  # Limit data to before this time
 ```
 
 ## Installation
 
-### Installing via Smithery
-
-To install Datadog MCP Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@winor30/mcp-server-datadog):
+### Via npm
 
 ```bash
-npx -y @smithery/cli install @winor30/mcp-server-datadog --client claude
+npm install @anyshift/datadog-mcp-server
 ```
 
-### Manual Installation
+### Development Setup
 
 ```bash
+git clone https://github.com/anyshift-engineering/mcp-server-datadog.git
+cd mcp-server-datadog
 pnpm install
 pnpm build
 pnpm watch   # for development with auto-rebuild
@@ -241,72 +321,145 @@ pnpm watch   # for development with auto-rebuild
 
 ## Usage with Claude Desktop
 
-To use this with Claude Desktop, add the following to your `claude_desktop_config.json`:
+Add the following to your `claude_desktop_config.json`:
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json`  
-On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+**MacOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+**Windows**: `%APPDATA%/Claude/claude_desktop_config.json`
+
+### Using the built package:
 
 ```json
 {
   "mcpServers": {
-    "github": {
+    "anyshift-datadog": {
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "args": ["-y", "@anyshift/datadog-mcp-server"],
       "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
+        "DATADOG_API_KEY": "<YOUR_API_KEY>",
+        "DATADOG_APP_KEY": "<YOUR_APP_KEY>",
+        "DATADOG_SITE": "<YOUR_SITE>",
+        "WRITE_TO_FILE": "true",
+        "OUTPUT_DIR": "/tmp/datadog-mcp-output"
       }
     }
   }
 }
 ```
 
+### Using local development build:
+
 ```json
 {
   "mcpServers": {
-    "datadog": {
+    "anyshift-datadog": {
       "command": "/path/to/mcp-server-datadog/build/index.js",
       "env": {
         "DATADOG_API_KEY": "<YOUR_API_KEY>",
         "DATADOG_APP_KEY": "<YOUR_APP_KEY>",
-        "DATADOG_SITE": "<YOUR_SITE>" // Optional
+        "DATADOG_SITE": "<YOUR_SITE>",
+        "WRITE_TO_FILE": "true",
+        "OUTPUT_DIR": "/tmp/datadog-mcp-output"
       }
     }
   }
 }
 ```
 
-Or specify via `npx`:
+## Development & Debugging
 
-```json
-{
-  "mcpServers": {
-    "mcp-server-datadog": {
-      "command": "npx",
-      "args": ["-y", "@winor30/mcp-server-datadog"],
-      "env": {
-        "DATADOG_API_KEY": "<YOUR_API_KEY>",
-        "DATADOG_APP_KEY": "<YOUR_APP_KEY>",
-        "DATADOG_SITE": "<YOUR_SITE>" // Optional
-      }
-    }
-  }
-}
-```
+### MCP Inspector
 
-## Debugging
-
-Because MCP servers communicate over standard input/output, debugging can sometimes be tricky. We recommend using the [MCP Inspector](https://github.com/modelcontextprotocol/inspector). You can run the inspector with:
+Debug and test the server using the MCP Inspector:
 
 ```bash
+# Build and run inspector
+pnpm build
 npm run inspector
+
+# Or with local config
+npm run inspect-local
 ```
 
-The inspector will provide a URL you can open in your browser to see logs and send requests manually.
+The inspector provides a web interface to test tools and view logs.
+
+### Testing
+
+```bash
+# Run tests
+pnpm test
+
+# Run with coverage
+pnpm test:coverage
+
+# Watch mode for development
+pnpm test:watch
+```
+
+### Code Quality
+
+```bash
+# Lint and format code
+pnpm lint
+pnpm format
+
+# Type checking (via build)
+pnpm build
+```
+
+## File Writing System
+
+When `WRITE_TO_FILE=true` and `OUTPUT_DIR` is set, responses are automatically saved with:
+
+- **Compact Filenames**: `{timestamp}_{tool_abbrev}_{args_hash}.json`
+- **Schema Analysis**: Automatic JSON schema generation for responses
+- **Metadata**: File size, line count, and structural information
+- **Security**: Sensitive data filtering in filenames
+
+Example output:
+
+```
+Response written to file: /tmp/output/1758125608129_met_qry_a1b2c3.json
+Size: 1024 characters
+Lines: 42
+
+JSON Schema:
+{
+  "type": "object",
+  "properties": {
+    "series": {"type": "array", "length": 5}
+  }
+}
+```
 
 ## Contributing
 
-Contributions are welcome! Feel free to open an issue or a pull request if you have any suggestions, bug reports, or improvements to propose.
+This project is maintained by the Anyshift engineering team. We welcome contributions!
+
+### Getting Started
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/amazing-feature`
+3. Make your changes and add tests
+4. Run the test suite: `pnpm test`
+5. Commit your changes: `git commit -m 'Add amazing feature'`
+6. Push to your branch: `git push origin feature/amazing-feature`
+7. Open a Pull Request
+
+### Development Guidelines
+
+- Follow TypeScript best practices
+- Add tests for new functionality
+- Update documentation for new features
+- Ensure code passes linting and formatting checks
+
+## Acknowledgments
+
+This project is an enhanced fork of the excellent work by [@winor30](https://github.com/winor30) on [mcp-server-datadog](https://github.com/winor30/mcp-server-datadog). We're grateful for their foundational contribution to the MCP ecosystem.
 
 ## License
 
 This project is licensed under the [Apache License, Version 2.0](./LICENSE).
+
+---
+
+**Maintained with ❤️ by [Anyshift](https://github.com/anyshift-engineering)**
