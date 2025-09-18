@@ -7,6 +7,7 @@ import {
   MuteHostZodSchema,
   UnmuteHostZodSchema,
 } from './schema'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 /**
  * This module implements Datadog host management tools for muting, unmuting,
@@ -74,21 +75,10 @@ export const createHostsToolHandlers = (
         },
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              {
-                status: 'success',
-                message: `Host ${hostname} has been muted successfully${message ? ` with message: ${message}` : ''}${end ? ` until ${new Date(end * 1000).toISOString()}` : ''}`,
-              },
-              null,
-              2,
-            ),
-          },
-        ],
-      }
+      return McpResponse.fromApiData({
+        status: 'success',
+        message: `Host ${hostname} has been muted successfully${message ? ` with message: ${message}` : ''}${end ? ` until ${new Date(end * 1000).toISOString()}` : ''}`,
+      })
     },
 
     /**
@@ -102,21 +92,10 @@ export const createHostsToolHandlers = (
         hostName: hostname,
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              {
-                status: 'success',
-                message: `Host ${hostname} has been unmuted successfully`,
-              },
-              null,
-              2,
-            ),
-          },
-        ],
-      }
+      return McpResponse.fromApiData({
+        status: 'success',
+        message: `Host ${hostname} has been unmuted successfully`,
+      })
     },
 
     /**
@@ -132,21 +111,10 @@ export const createHostsToolHandlers = (
         from,
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(
-              {
-                total_active: response.totalActive || 0, // Total number of active hosts (UP and reporting) to Datadog
-                total_up: response.totalUp || 0, // Number of hosts that are UP and reporting to Datadog
-              },
-              null,
-              2,
-            ),
-          },
-        ],
-      }
+      return McpResponse.fromApiData({
+        total_active: response.totalActive || 0, // Total number of active hosts (UP and reporting) to Datadog
+        total_up: response.totalUp || 0, // Number of hosts that are UP and reporting to Datadog
+      })
     },
 
     /**
@@ -196,14 +164,7 @@ export const createHostsToolHandlers = (
         url: `https://app.datadoghq.com/infrastructure?host=${host.name}`,
       }))
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Hosts: ${JSON.stringify(hosts)}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData(hosts, 'Hosts:')
     },
   }
 }

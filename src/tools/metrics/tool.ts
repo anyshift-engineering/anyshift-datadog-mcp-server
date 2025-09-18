@@ -3,6 +3,7 @@ import { v1 } from '@datadog/datadog-api-client'
 import { createToolSchema } from '../../utils/tool'
 import { QueryMetricsZodSchema } from './schema'
 import { adjustTimestamps } from '../../utils/adjustTimestamps'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 type MetricsToolName = 'query_metrics'
 type MetricsTool = ExtendedTool<MetricsToolName>
@@ -29,14 +30,7 @@ export const createMetricsToolHandlers = (
       const adjusted = adjustTimestamps(from, to)
 
       if (!adjusted.ok) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Metrics data: ${[]}`,
-            },
-          ],
-        }
+        return McpResponse.fromApiData([], 'Metrics data:')
       }
 
       const response = await apiInstance.queryMetrics({
@@ -45,14 +39,7 @@ export const createMetricsToolHandlers = (
         query,
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Queried metrics data: ${JSON.stringify({ response })}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData(response, 'Queried metrics data:')
     },
   }
 }

@@ -3,6 +3,7 @@ import { v2 } from '@datadog/datadog-api-client'
 import { createToolSchema } from '../../utils/tool'
 import { GetLogsZodSchema, GetAllServicesZodSchema } from './schema'
 import { adjustTimestamps } from '../../utils/adjustTimestamps'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 type LogsToolName = 'get_logs' | 'get_all_services'
 type LogsTool = ExtendedTool<LogsToolName>
@@ -33,14 +34,7 @@ export const createLogsToolHandlers = (
     const adjusted = adjustTimestamps(from, to)
 
     if (!adjusted.ok) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Logs data: ${[]}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData([], 'Logs data:')
     }
 
     const response = await apiInstance.listLogs({
@@ -62,14 +56,7 @@ export const createLogsToolHandlers = (
       throw new Error('No logs data returned')
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Logs data: ${JSON.stringify(response.data)}`,
-        },
-      ],
-    }
+    return McpResponse.fromApiData(response.data, 'Logs data:')
   },
 
   get_all_services: async (request) => {
@@ -80,14 +67,7 @@ export const createLogsToolHandlers = (
     const adjusted = adjustTimestamps(from, to)
 
     if (!adjusted.ok) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Services: ${[]}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData([], 'Services:')
     }
 
     const response = await apiInstance.listLogs({
@@ -119,13 +99,6 @@ export const createLogsToolHandlers = (
       }
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Services: ${JSON.stringify(Array.from(services).sort())}`,
-        },
-      ],
-    }
+    return McpResponse.fromApiData(Array.from(services).sort(), 'Services:')
   },
 })

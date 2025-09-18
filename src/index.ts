@@ -28,6 +28,8 @@ import { ToolHandlers } from './utils/types'
 import { createDatadogConfig } from './utils/datadog'
 import { createDowntimesToolHandlers, DOWNTIMES_TOOLS } from './tools/downtimes'
 import { createRumToolHandlers, RUM_TOOLS } from './tools/rum'
+import { createJqToolHandlers, JQ_TOOLS } from './tools/jq'
+import { wrapToolHandlers } from './utils/responseWrapper'
 import { v2, v1 } from '@datadog/datadog-api-client'
 
 const server = new Server(
@@ -62,17 +64,14 @@ server.setRequestHandler(ListToolsRequestSchema, async () => {
       ...HOSTS_TOOLS,
       ...DOWNTIMES_TOOLS,
       ...RUM_TOOLS,
+      ...JQ_TOOLS,
     ],
   }
 })
 
-if (
-  !process.env.DATADOG_API_KEY ||
-  !process.env.DATADOG_APP_KEY ||
-  !process.env.DATADOG_EVAL_TIMESTAMP
-) {
+if (!process.env.DATADOG_API_KEY || !process.env.DATADOG_APP_KEY) {
   throw new Error(
-    '[MCP Eval Version] DATADOG_API_KEY and DATADOG_APP_KEY and DATADOG_EVAL_TIMESTAMP must be set',
+    '[MCP Eval Version] DATADOG_API_KEY and DATADOG_APP_KEY must be set',
   )
 }
 
@@ -82,7 +81,7 @@ const datadogConfig = createDatadogConfig({
   site: process.env.DATADOG_SITE,
 })
 
-const TOOL_HANDLERS: ToolHandlers = {
+const originalHandlers: ToolHandlers = {
   ...createIncidentToolHandlers(new v2.IncidentsApi(datadogConfig)),
   ...createMetricsToolHandlers(new v1.MetricsApi(datadogConfig)),
   ...createLogsToolHandlers(new v2.LogsApi(datadogConfig)),
@@ -92,7 +91,11 @@ const TOOL_HANDLERS: ToolHandlers = {
   ...createHostsToolHandlers(new v1.HostsApi(datadogConfig)),
   ...createDowntimesToolHandlers(new v1.DowntimesApi(datadogConfig)),
   ...createRumToolHandlers(new v2.RUMApi(datadogConfig)),
+  ...createJqToolHandlers(),
 }
+
+// Wrap all tool handlers with file writing capability
+const TOOL_HANDLERS: ToolHandlers = wrapToolHandlers(originalHandlers)
 /**
  * Handler for invoking Datadog-related tools in the mcp-server-datadog.
  * The TOOL_HANDLERS object contains various tools that interact with different Datadog APIs.

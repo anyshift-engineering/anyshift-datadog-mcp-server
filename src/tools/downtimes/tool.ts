@@ -6,6 +6,7 @@ import {
   ScheduleDowntimeZodSchema,
   CancelDowntimeZodSchema,
 } from './schema'
+import { McpResponse } from '../../utils/responses/McpResponse'
 
 type DowntimesToolName =
   | 'list_downtimes'
@@ -46,14 +47,7 @@ export const createDowntimesToolHandlers = (
         currentOnly,
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Listed downtimes:\n${JSON.stringify(res, null, 2)}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData(res, 'Listed downtimes:')
     },
 
     schedule_downtime: async (request) => {
@@ -83,14 +77,7 @@ export const createDowntimesToolHandlers = (
         body: downtimeData,
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Scheduled downtime: ${JSON.stringify(res, null, 2)}`,
-          },
-        ],
-      }
+      return McpResponse.fromApiData(res, 'Scheduled downtime:')
     },
 
     cancel_downtime: async (request) => {
@@ -102,14 +89,7 @@ export const createDowntimesToolHandlers = (
         downtimeId,
       })
 
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Cancelled downtime with ID: ${downtimeId}`,
-          },
-        ],
-      }
+      return McpResponse.success(`Cancelled downtime with ID: ${downtimeId}`)
     },
   }
 }
